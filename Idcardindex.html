@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBI General Insurance - Agent ID Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        :root {
+            --sbi-purple: #7E1F78;
+            --sbi-blue: #00A6E3;
+            --sbi-dark: #2c3e50;
+            --light-bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--sbi-dark);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--sbi-purple);
+        }
+
+        header p {
+            margin: 5px 0 0;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /* --- Input Section --- */
+        .controls {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--sbi-dark);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], 
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; 
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--sbi-blue);
+            box-shadow: 0 0 0 2px rgba(0, 166, 227, 0.1);
+        }
+
+        .actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-download {
+            background: var(--sbi-blue);
+            color: white;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .btn-crop {
+            background: var(--sbi-purple);
+            color: white;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* --- ID Card Preview Section --- */
+        .preview-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: start;
+            min-width: 320px;
+        }
+
+        #idCard {
+            width: 350px;
+            height: 580px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Design Element */
+        .card-header {
+            height: 140px;
+            background: linear-gradient(135deg, var(--sbi-purple) 0%, var(--sbi-blue) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        /* Curves */
+        .card-header::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: white;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            transform: scaleX(1.5);
+        }
+
+        .card-logo-container {
+            z-index: 2;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Using the provided logo */
+        .card-logo {
+            height: 50px;
+            width: auto;
+        }
+        
+        .card-tagline {
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: var(--sbi-dark);
+            margin-top: 4px;
+            text-align: center;
+        }
+        
+        /* Agent Photo */
+        .photo-container {
+            width: 130px;
+            height: 130px;
+            background: white;
+            border-radius: 50%;
+            margin: -50px auto 10px; /* Pull up into header */
+            z-index: 5;
+            position: relative;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .photo-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #eee;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50%;
+            border: 3px solid var(--sbi-blue);
+        }
+
+        #agentPhoto {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Hidden until image selected */
+        }
+
+        /* Agent Details */
+        .card-body {
+            text-align: center;
+            padding: 10px 20px;
+            flex-grow: 1;
+            color: var(--sbi-dark);
+        }
+
+        .agent-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 5px 0;
+            color: var(--sbi-purple);
+        }
+
+        .agent-role {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .detail-row {
+            background: #f8f9fa;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            border-left: 4px solid var(--sbi-blue);
+        }
+
+        .icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .detail-text {
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: #888;
+            display: block;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Footer */
+        .card-footer {
+            background: var(--sbi-purple);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Loading Overlay */
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--sbi-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Cropper Modal */
+        #cropperModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .cropper-container-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cropper-wrapper {
+            max-height: 60vh;
+            overflow: hidden;
+        }
+
+        #imageToCrop {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Hide elements during capture */
+        @media print {
+            .controls, header { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Agent Identity Card Generator</h1>
+    <p>SBI General Insurance - Health Vertical</p>
+</header>
+
+<div class="container">
+    <div class="controls">
+        <h3 style="margin-top:0; color:var(--sbi-dark);">Agent Details</h3>
+        
+        <div class="form-group">
+            <label for="inputImage">Upload Photo</label>
+            <input type="file" id="inputImage" accept="image/*" onchange="openCropper(event)">
+        </div>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="inputName" placeholder="e.g. Rahul Kumar" oninput="updateCard()" maxlength="25">
+        </div>
+
+        <div class="form-group">
+            <label>Licence Code</label>
+            <input type="text" id="inputLicence" placeholder="e.g. SBI-G-882910" oninput="updateCard()" maxlength="20">
+        </div>
+
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" id="inputContact" placeholder="e.g. +91 98765 43210" oninput="updateCard()" maxlength="15">
+        </div>
+
+        <div class="actions">
+            <button class="btn-download" onclick="downloadCard()">
+                <span>⬇</span> Download ID Card
+            </button>
+            <button class="btn-whatsapp" onclick="shareToWhatsapp()">
+                <span>📱</span> Share / Send on WhatsApp
+            </button>
+        </div>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 10px; line-height: 1.4;">
+            <strong>Note:</strong> To use on WhatsApp Status, click "Download" first, then upload the image from your gallery.
+        </p>
+    </div>
+
+    <div class="preview-area">
+        <div id="idCard">
+            <div class="card-header">
+                <div class="card-logo-container">
+                    <img src="image_0.png" alt="SBI General Logo" class="card-logo">
+                    <div class="card-tagline">SURAKSHA AUR BHAROSA DONO</div>
+                </div>
+            </div>
+            
+            <div class="photo-container">
+                <div class="photo-frame">
+                    <img id="agentPhoto" src="" alt="Agent Photo">
+                </div>
+            </div>
+
+            <div class="card-body">
+                <h2 class="agent-name" id="cardName">Agent Name</h2>
+                <div class="agent-role">Authorized Health Advisor</div>
+
+                <div class="detail-row">
+                    <div class="icon">🆔</div>
+                    <div>
+                        <span class="detail-label">Licence Code</span>
+                        <span class="detail-text" id="cardLicence">XXXX-XXXX</span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="icon">📞</div>
+                    <div>
+                        <span class="detail-label">Contact</span>
+                        <span class="detail-text" id="cardContact">+91 XXXXX XXXXX</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div>SBI General Insurance Company Limited</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loading">
+    <div class="spinner"></div>
+    <p>Generating Card...</p>
+</div>
+
+<div id="cropperModal">
+    <div class="cropper-container-box">
+        <h3 style="margin-top:0;">Crop Your Photo</h3>
+        <div class="cropper-wrapper">
+            <img id="imageToCrop" src="">
+        </div>
+        <button class="btn-crop" onclick="cropImage()">
+            <span>✂</span> Crop & Use Photo
+        </button>
+        <button style="background:#ccc; color:#333; margin-top:10px;" onclick="closeCropper()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    let cropper;
+
+    // 1. Update Text Fields Real-time
+    function updateCard() {
+        const name = document.getElementById('inputName').value;
+        const licence = document.getElementById('inputLicence').value;
+        const contact = document.getElementById('inputContact').value;
+
+        document.getElementById('cardName').innerText = name || "Agent Name";
+        document.getElementById('cardLicence').innerText = licence || "XXXX-XXXX";
+        document.getElementById('cardContact').innerText = contact || "+91 XXXXX XXXXX";
+    }
+
+    // 2. Handle Image Upload & Open Cropper
+    function openCropper(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imageToCrop').src = e.target.result;
+                document.getElementById('cropperModal').style.display = 'flex';
+                
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(document.getElementById('imageToCrop'), {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    cropBoxResizable: true
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 3. Crop and Set Image
+    function cropImage() {
+        const canvas = cropper.getCroppedCanvas({
+            width: 300,
+            height: 300,
+            fillColor: '#fff',
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        
+        const output = document.getElementById('agentPhoto');
+        output.src = canvas.toDataURL('image/jpeg');
+        output.style.display = 'block';
+        
+        closeCropper();
+    }
+
+    function closeCropper() {
+        document.getElementById('cropperModal').style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        document.getElementById('inputImage').value = ""; // Reset file input
+    }
+
+    // 4. Generate Image using html2canvas
+    async function generateBlob() {
+        const cardElement = document.getElementById('idCard');
+        
+        const canvas = await html2canvas(cardElement, {
+            scale: 2, // High resolution
+            useCORS: true,
+            backgroundColor: null,
+            allowTaint: true
+        });
+
+        return new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/png');
+        });
+    }
+
+    // 5. Download Function
+    async function downloadCard() {
+        document.getElementById('loading').style.display = 'flex';
+        
+        try {
+            const blob = await generateBlob();
+            const link = document.createElement('a');
+            link.download = 'SBI_General_Agent_ID.png';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        } catch (err) {
+            alert("Error generating image. Please try again.");
+            console.error(err);
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    // 6. Share/WhatsApp Function
+    async function shareToWhatsapp() {
+        document.getElementById('loading').style.display = 'flex';
+
+        try {
+            const blob = await generateBlob();
+            
+            if (navigator.share && navigator.canShare) {
+                const file = new File([blob], "agent_id.png", { type: "image/png" });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'SBI General Agent ID',
+                        text: 'Here is my Digital Agent ID Card.'
+                    });
+                    document.getElementById('loading').style.display = 'none';
+                    return;
+                }
+            }
+
+            const link = document.createElement('a');
+            link.download = 'SBI_General_Agent_ID.png';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            
+            setTimeout(() => {
+                alert("Image downloaded! Opening WhatsApp...\nPlease attach the downloaded image from your gallery.");
+                window.open("https://wa.me/?text=Here%20is%20my%20digital%20visiting%20card.%20Please%20check%20the%20image.", "_blank");
+            }, 1000);
+
+        } catch (err) {
+            console.error(err);
+            alert("Sharing failed. Please use the Download button.");
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
